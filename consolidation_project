@@ -21,3 +21,26 @@ def create_deck():
 
 def card_str(card):
     return f"{card[0]} of {card[1]}"
+
+def has_suit(hand, suit):
+    return any(c[1] == suit for c in hand)
+
+def play_card(player_num, hand, lead_suit=None):
+    print(f"\nPlayer {player_num}'s hand:")
+    for i, c in enumerate(hand):
+        print(f"{i+1}: {card_str(c)}")
+    # Enforce following suit if lead_suit given and possible
+    while True:
+        choice = input(f"Player {player_num}, select a card to play by number: ")
+        if not choice.isdigit():
+            print("Invalid input. Enter the card number.")
+            continue
+        idx = int(choice)-1
+        if idx < 0 or idx >= len(hand):
+            print("Invalid card number.")
+            continue
+        selected = hand[idx]
+        if lead_suit and has_suit(hand, lead_suit) and selected[1] != lead_suit:
+            print(f"You must follow suit ({lead_suit}).")
+            continue
+        return hand.pop(idx)
