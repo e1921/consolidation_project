@@ -44,3 +44,88 @@ def play_card(player_num, hand, lead_suit=None):
             print(f"You must follow suit ({lead_suit}).")
             continue
         return hand.pop(idx)
+
+def main():
+    deck = create_deck()
+    # Deal 8 cards each
+    hand1 = [deck.pop() for _ in range(8)]
+    hand2 = [deck.pop() for _ in range(8)]
+
+    points = [0, 0]
+    rounds_played = 0
+
+    lead = random.choice([0,1])  # Player 1 is 0, Player 2 is 1
+
+    # Keep track of how many times dealt 4 cards
+    deals_left = 2
+
+    while rounds_played < 16:
+        print(f"\n--- Round {rounds_played+1} ---")
+        print(f"Player {lead+1} leads.")
+
+        # Lead player plays card
+        lead_card = play_card(lead+1, hand1 if lead==0 else hand2)
+        lead_suit = lead_card[1]
+
+        # Other player plays card
+        other = 1 - lead
+        other_hand = hand1 if other == 0 else hand2
+        print(f"\nPlayer {other+1} must follow suit: {lead_suit}")
+        other_card = play_card(other+1, other_hand, lead_suit)
+
+        print(f"\nPlayer {lead+1} played {card_str(lead_card)}")
+        print(f"Player {other+1} played {card_str(other_card)}")
+
+        # Determine winner
+        if other_card[1] == lead_suit and card_value(other_card) > card_value(lead_card):
+            winner = other
+        else:
+            winner = lead
+
+        points[winner] += 1
+        print(f"Player {winner+1} wins the round and now has {points[winner]} point(s).")
+        lead = winner
+        rounds_played += 1
+
+        # Reveal one card from deck if any left
+        if deck:
+            revealed = deck.pop()
+            print(f"Card revealed from deck: {card_str(revealed)}")
+        else:
+            print("No cards left to reveal.")
+
+        # Deal 4 more cards if both players have 4 cards and deals_left > 0
+        if len(hand1) == 4 and len(hand2) == 4 and deals_left > 0:
+            print("Both players have 4 cards. Dealing 4 more cards each...")
+            for _ in range(4):
+                if deck:
+                    hand1.append(deck.pop())
+                if deck:
+                    hand2.append(deck.pop())
+            deals_left -= 1
+
+        # Early game end if player reaches 9 and opponent has at least 1
+        if (points[0] >= 9 and points[1] >= 1) or (points[1] >= 9 and points[0] >= 1):
+            print("Early game end condition met.")
+            break
+
+    # Handle "shoot the moon"
+    if points[0] == 0 and points[1] == 16:
+        points[0] = 17
+        print("Player 1 shot the moon! Score set to 17.")
+    elif points[1] == 0 and points[0] == 16:
+        points[1] = 17
+        print("Player 2 shot the moon! Score set to 17.")
+
+    print("\n--- Game Over ---")
+    print(f"Final Score - Player 1: {points[0]}, Player 2: {points[1]}")
+
+    if points[0] > points[1]:
+        print("Player 1 wins!")
+    elif points[1] > points[0]:
+        print("Player 2 wins!")
+    else:
+        print("It's a tie!")
+
+if __name__ == "__main__":
+    main()
